@@ -1,0 +1,87 @@
+// Edit this with the path to your enlistment. This is the folder on your local machine that contains the dev_*, m_*, w_* folders, BuildX, metro.txt, etc.
+// It's ok for the path to contain spaces. Don't put quotes around it.
+// If you specify %SDKBX% here (which points to your buildx folder) then the app will use the parent folder of that path.
+
+my_enlistment_folder %SDKBX%
+
+api_ref_stub_folder \\wcpub-dc-pub2\winrt\latest
+
+// Set dryrun to 1 or 0.
+// 1: Means, yes, this is a dry run. So don't check out files but do try to edit and save them (so make them writable if you want to see edits).
+// 0: Means, no, this is not a dry run, it's a real run. So DO try to check out files, edit, and save them.
+
+dryrun 1
+
+// !!!NOTE!!! a project has to be in metro.txt or windev.txt to be processed. Also, a topic has to be represented by an
+// unfiltered TOC entry (that is, no MSDN build condition) to be processed.
+
+// This is the list of projects, or search patterns, that document UWP (Windows 10) features and namespaces.
+
+uwp_proj AppXPkgSchema
+uwp_proj dev_*
+uwp_proj m_ads
+uwp_proj m_ca_platformguides
+uwp_proj m_getstarted
+uwp_proj m_selling
+uwp_proj m_selling_legal
+uwp_proj m_selling_legal_ada
+uwp_proj m_ux_design
+uwp_proj m_ux_design_basics
+uwp_proj w_*
+uwp_proj wp_appmod
+uwp_proj wp_dvc_notif
+uwp_proj wp_dvc_power
+uwp_proj wp_manage_deploy
+uwp_proj wp_media_dvc
+uwp_proj wp_notif_man
+uwp_proj wp_persinfo
+uwp_proj wp_persinfo_prov
+uwp_proj wp_speech_recog
+uwp_proj wp_startscreen
+uwp_proj wp_sys
+uwp_proj wp_sys_power
+uwp_proj wp_sys_profile
+uwp_proj wp_sys_user_game_core
+uwp_proj wp_ui_input
+
+// These types are present in UWP projects, but they're not UWP types.
+
+uwp_exclude_type Windows.Phone.PersonalInformation.ConnectTileData
+uwp_exclude_type Windows.Phone.PersonalInformation.ConnectTileImage
+uwp_exclude_type Windows.Phone.PersonalInformation.ContactBinding
+uwp_exclude_type Windows.Phone.PersonalInformation.ContactBindingAttributesConstants
+uwp_exclude_type Windows.Phone.PersonalInformation.ContactBindingManager
+uwp_exclude_type Windows.Phone.PersonalInformation.ContactBindings
+uwp_exclude_type Windows.Phone.Speech.Recognition.InstalledSpeechRecognizers
+uwp_exclude_type Windows.Phone.Speech.Recognition.SemanticProperty
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechAudioProblemOccurredEventArgs
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechGrammar
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechGrammarProbability
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechGrammarSet
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechPredefinedGrammar
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognitionAudioProblem
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognitionConfidence
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognitionResult
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognitionResultDetail
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognitionUIResult
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizer
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerAudioCaptureState
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerAudioCaptureStateChangedEventArgs
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerInformation
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerSettings
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerUI
+uwp_exclude_type Windows.Phone.Speech.Recognition.SpeechRecognizerUISettings
+
+// This is the list of projects, or search patterns, that document WinRT (Windows 8.x, Windows Phone 8.x, and Windows 10) features and namespaces.
+
+winrt_proj AppXPkgSchema
+winrt_proj dev_*
+winrt_proj modern_nodes
+winrt_proj m_*
+winrt_proj w_*
+winrt_proj wp_*
+
+// This is the list of project prefixes that contain reference. These are prefixes, not search patterns.
+
+ref_proj_prefix w_
+ref_proj_prefix wp_

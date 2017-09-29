@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2AF6AE45-C5A7-4F4F-913A-08342992A514}"
+	ProjectSection(SolutionItems) = preProject
+		CommonModels.cs = CommonModels.cs
+		CommonModelsWin32.cs = CommonModelsWin32.cs
+		configuration.txt = configuration.txt
+		EditorBase.cs = EditorBase.cs
+		ProgramBase.cs = ProgramBase.cs
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
