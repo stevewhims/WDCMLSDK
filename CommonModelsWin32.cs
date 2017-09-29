@@ -17,45 +17,47 @@ namespace WDCMLSDK
 		/// <summary>
 		/// Gets an object model representing the Win32 API ref docs.
 		/// </summary>
-		public static ApiRefModelWin32 GetApiRefModelWin32
+		public static ApiRefModelWin32 GetApiRefModelWin32(Platform platform)
 		{
-			get
+			string platformDesc = "desktop";
+			string desktopOrWsuaDotTxtFilename = "desktop.txt";
+			List<string> desktopOrWsuaDotTxt = null;
+			if (platform == Platform.Win32ServerOnly)
 			{
-				ProgramBase.ConsoleWrite("Creating Win32 docset", ConsoleWriteStyle.Success);
-
-				List<string> desktopDotTxt = null;
-				ProgramBase.LoadTextFileIntoStringList("desktop.txt", ref desktopDotTxt, "MISSING desktop.txt. This file could not be found in your enlistment folder path. Your configuration.txt contains something like: my_enlistment_folder D:\\Source_Depot\\devdocmain. This should be the folder that contains the dev_*, m_*, w_* folders, BuildX, desktop.txt, etc.");
-
-				string projectListIntro = "These are the shipping projects that document Win32 functions (they're in desktop.txt). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
-
-				ProgramBase.ConsoleWrite(projectListIntro, ConsoleWriteStyle.Highlight);
-
-				List<DirectoryInfo> projectDirectoryInfos = new List<DirectoryInfo>();
-
-				foreach (string eachProjectName in desktopDotTxt)
-				{
-					projectDirectoryInfos.AddRange(ProgramBase.EnlistmentDirectoryInfo.GetDirectories(eachProjectName, SearchOption.TopDirectoryOnly).ToList());
-				}
-
-				ApiRefModelWin32 apiRefModelWin32 = new ApiRefModelWin32();
-
-				foreach (DirectoryInfo eachProjectDirectoryInfo in projectDirectoryInfos)
-				{
-					ProgramBase.ConsoleWrite(eachProjectDirectoryInfo.Name, ConsoleWriteStyle.Default, false);
-					if (eachProjectDirectoryInfo != projectDirectoryInfos[projectDirectoryInfos.Count - 1])
-					{
-						ProgramBase.ConsoleWrite(", ", ConsoleWriteStyle.Default, false);
-					}
-					else
-					{
-						ProgramBase.ConsoleWrite(".\n\n");
-					}
-					// For reference projects, the topic files should be in a folder with the same name as the project folder. But use the standard algorithm just to be sure.
-					apiRefModelWin32.ProcessProject(eachProjectDirectoryInfo.Name, EditorBase.GetEditorsForTopicsInProject(eachProjectDirectoryInfo), ref apiRefModelWin32);
-				}
-
-				return apiRefModelWin32;
+				platformDesc = "server";
+				desktopOrWsuaDotTxtFilename = "wsua.txt";
 			}
+			ProgramBase.ConsoleWrite("Creating Win32 " + platformDesc + " docset", ConsoleWriteStyle.Success);
+			string projectListIntro = "These are the shipping projects that document Win32 " + platformDesc + " functions (they're in " + desktopOrWsuaDotTxtFilename + "). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
+			ProgramBase.ConsoleWrite(projectListIntro, ConsoleWriteStyle.Highlight);
+
+			ProgramBase.LoadTextFileIntoStringList(desktopOrWsuaDotTxtFilename, ref desktopOrWsuaDotTxt, "MISSING " + desktopOrWsuaDotTxtFilename + ". This file could not be found in your enlistment folder path. Your configuration.txt contains something like: my_enlistment_folder D:\\Source_Depot\\devdocmain. This should be the folder that contains the dev_*, m_*, w_* folders, BuildX, desktop.txt, etc.");
+
+			List<DirectoryInfo> projectDirectoryInfos = new List<DirectoryInfo>();
+
+			foreach (string eachProjectName in desktopOrWsuaDotTxt)
+			{
+				projectDirectoryInfos.AddRange(ProgramBase.EnlistmentDirectoryInfo.GetDirectories(eachProjectName, SearchOption.TopDirectoryOnly).ToList());
+			}
+
+			ApiRefModelWin32 apiRefModelWin32 = new ApiRefModelWin32();
+
+			foreach (DirectoryInfo eachProjectDirectoryInfo in projectDirectoryInfos)
+			{
+				ProgramBase.ConsoleWrite(eachProjectDirectoryInfo.Name, ConsoleWriteStyle.Default, false);
+				if (eachProjectDirectoryInfo != projectDirectoryInfos[projectDirectoryInfos.Count - 1])
+				{
+					ProgramBase.ConsoleWrite(", ", ConsoleWriteStyle.Default, false);
+				}
+				else
+				{
+					ProgramBase.ConsoleWrite(".\n\n");
+				}
+				// For reference projects, the topic files should be in a folder with the same name as the project folder. But use the standard algorithm just to be sure.
+				apiRefModelWin32.ProcessProject(eachProjectDirectoryInfo.Name, EditorBase.GetEditorsForTopicsInProject(eachProjectDirectoryInfo), ref apiRefModelWin32);
+			}
+
+			return apiRefModelWin32;
 		}
 
 		// Note: the key here is the ToLower version but the FunctionWin32 contains the original case from the topic's title.
@@ -390,6 +392,7 @@ namespace WDCMLSDK
 			return null;
 		}
 
+#if (USING_WCD)
 		public void AddApi(Microsoft.CoreSystem.WindowsCompositionDatabase.Database.Api api, string sdkVersion, string functionWin32Id)
 		{
 			bool isApiSet = false;
@@ -412,6 +415,7 @@ namespace WDCMLSDK
 				module.AddApi(api.Name, sdkVersion, functionWin32Id);
 			}
 		}
+#endif
 
 		public void SortAlphabetically()
 		{

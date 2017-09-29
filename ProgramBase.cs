@@ -647,9 +647,6 @@ namespace WDCMLSDKBase
 		public static DocSet CreateDocSet(DocSetType docSetType, Platform platform, string description)
 		{
 			ProgramBase.ConsoleWrite("Creating docset: \"" + description + "\"", ConsoleWriteStyle.Success);
-
-			if (platform == Platform.Win32WindowsServerOnly) return DocSet.CreateWin32DocSet(docSetType, platform, description);
-
 			DocSet docSet = new DocSet(docSetType, platform, description);
 
             List<string> metroAndWindevDotTxt = null;
@@ -718,49 +715,6 @@ namespace WDCMLSDKBase
 			foreach (DirectoryInfo eachProjectToRemove in projectsToRemove)
 			{
 				docSet.ProjectDirectoryInfos.Remove(eachProjectToRemove);
-			}
-
-			return docSet;
-		}
-
-		private static DocSet CreateWin32DocSet(DocSetType docSetType, Platform platform, string description)
-		{
-			DocSet docSet = new DocSet(docSetType, platform, description);
-
-			List<string> wsuaDotTxt = null;
-			ProgramBase.LoadTextFileIntoStringList("wsua.txt", ref wsuaDotTxt, "MISSING wsua.txt. This file could not be found in your enlistment folder path. Your configuration.txt contains something like: my_enlistment_folder D:\\Source_Depot\\devdocmain. This should be the folder that contains the dev_*, m_*, w_* folders, BuildX, metro.txt, etc.");
-
-			string docSetTypeDesc = "features and functions";
-			if (docSet.DocSetType == DocSetType.ConceptualOnly) docSetTypeDesc = "features";
-			if (docSet.DocSetType == DocSetType.ReferenceOnly) docSetTypeDesc = "functions";
-
-			string projectListIntro = "These are the shipping projects that document the Windows SDK " + docSetTypeDesc + " (they're in wsua.txt). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
-			if (docSet.Platform == Platform.Win32WindowsServerOnly) projectListIntro = "These are the shipping projects that document Windows-Server-only " + docSetTypeDesc + " (they're in wsua.txt). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
-
-			if (docSet.Platform == Platform.Win32WindowsServerOnly)
-			{
-				foreach (string eachProjectName in wsuaDotTxt)
-				{
-					docSet.ProjectDirectoryInfos.AddRange(ProgramBase.EnlistmentDirectoryInfo.GetDirectories(eachProjectName, SearchOption.TopDirectoryOnly).ToList());
-				}
-			}
-			else
-			{
-			}
-
-			ProgramBase.ConsoleWrite(projectListIntro, ConsoleWriteStyle.Highlight);
-
-			foreach (DirectoryInfo eachDirectoryInfo in docSet.ProjectDirectoryInfos)
-			{
-				ProgramBase.ConsoleWrite(eachDirectoryInfo.Name, ConsoleWriteStyle.Default, false);
-				if (eachDirectoryInfo != docSet.ProjectDirectoryInfos[docSet.ProjectDirectoryInfos.Count - 1])
-				{
-					ProgramBase.ConsoleWrite(", ", ConsoleWriteStyle.Default, false);
-				}
-				else
-				{
-					ProgramBase.ConsoleWrite(".\n\n");
-				}
 			}
 
 			return docSet;
@@ -999,9 +953,13 @@ namespace WDCMLSDKBase
 		/// </summary>
 		WinRTWindows8xAnd10,
 		/// <summary>
+		/// Win32 APIs and features supported by Desktop
+		/// </summary>
+		Win32Desktop,
+		/// <summary>
 		/// Win32 APIs and features supported by Windows Server (only)
 		/// </summary>
-		Win32WindowsServerOnly
+		Win32ServerOnly
 	}
 
 	/// <summary>
