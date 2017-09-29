@@ -192,7 +192,6 @@ namespace WDCMLSDK
 			}
 		}
 
-        // jtw - find, or create if it doesn't exist yet, the specified WinRT class
         public ClassWinRT EnsureClassWinRT(string id, string name, List<string> interfacesImplemented, FileInfo fileInfo, TopicType topicType = TopicType.NotYetKnown, ClassWinRTProvenance classWinRTProvenance = ClassWinRTProvenance.Topic)
 		{
 			ClassWinRT classWinRT = null;

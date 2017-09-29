@@ -68,8 +68,7 @@ namespace WDCMLSDK
 				string eachTopicMetadataAtId = eachTopicEditor.GetMetadataAtId();
 				string eachTopicTitle = eachTopicEditor.GetMetadataAtTitle();
 				FileInfo eachTopicFileInfo = eachTopicEditor.FileInfo;
-				string type = eachTopicEditor.GetMetadataAtTypeAsString();
-				if (type == "function" || type == "iface")
+				if (eachTopicEditor.GetMetadataAtTypeAsString() == "function")
 				{
 					bool functionAlreadyExists = false;
 					FunctionWin32InDocs functionWin32 = null;
@@ -93,7 +92,7 @@ namespace WDCMLSDK
 			else
 			{
 				functionAlreadyExists = false;
-				this.FunctionWin32InDocses[name.ToLower()] = new FunctionWin32InDocs(name, projectName, id, fileInfo);
+				this.FunctionWin32InDocses[name.ToLower()] = new FunctionWin32InDocs(projectName, id, name, fileInfo);
 			}
 		}
 
@@ -116,11 +115,6 @@ namespace WDCMLSDK
 		}
 	}
 
-	internal enum ApiType
-	{
-		Function, CoInterface, CoClass
-	}
-
 	/// <summary>
 	/// A class representing a Win32 function.
 	/// </summary>
@@ -128,144 +122,11 @@ namespace WDCMLSDK
 	{
 		public string Name { get; set; }
 		public string ModuleName { get; set; }
-		public ApiType ApiType { get; set; }
 
 		public FunctionWin32(string name, string moduleName)
 		{
 			this.Name = name;
 			this.ModuleName = moduleName;
-			this.ApiType = ApiType.Function;
-		}
-	}
-
-	/// <summary>
-	/// A class representing a Win32 function in the docs.
-	/// </summary>
-	internal class FunctionWin32InDocs : FunctionWin32
-	{
-		public string ProjectName = string.Empty;
-		public string Id = string.Empty;
-		public FileInfo FileInfo;
-
-		public FunctionWin32InDocs(string name, string projectName, string id, FileInfo fileInfo)
-			: base(name, null)
-		{
-			this.ProjectName = projectName;
-			this.Id = id;
-			this.FileInfo = fileInfo;
-		}
-	}
-
-	/// <summary>
-	/// A class representing an api grouped by some key.
-	/// </summary>
-	internal class FunctionWin32Grouped : FunctionWin32
-	{
-		public string SdkVersionIntroducedIn { get; set; }
-		public string SdkVersionRemovedIn { get; set; }
-		public string FunctionWin32Id { get; set; }
-		public Module ModuleMovedTo { get; set; }
-		public bool SuppressInAlphabetizedList { get; set; }
-
-		public string Requirements
-		{
-			get
-			{
-				string requirements = "Introduced into " + this.ModuleName + " in Windows " + this.SdkVersionIntroducedIn;
-				if (this.ModuleName == null)
-				{
-					requirements = "Introduced in Windows " + this.SdkVersionIntroducedIn;
-				}
-				if (this.SdkVersionRemovedIn != null)
-				{
-					if (this.ModuleMovedTo != null)
-					{
-						requirements += ". Moved to " + this.ModuleMovedTo.Name + " in Windows " + this.SdkVersionRemovedIn;
-					}
-					else
-					{
-						requirements += ". Removed in Windows " + this.SdkVersionRemovedIn;
-					}
-				}
-				return requirements;
-			}
-		}
-
-		//public string Requirements
-		//{
-		//	get
-		//	{
-		//		string requirements = "Introduced in Windows " + this.SdkVersionIntroducedIn;
-		//		if (this.SdkVersionRemovedIn != null)
-		//		{
-		//			if (this.ModuleMovedTo != null)
-		//			{
-		//				requirements += ". Moved to " + this.ModuleMovedTo.Name + " in Windows " + this.SdkVersionRemovedIn;
-		//			}
-		//			else
-		//			{
-		//				requirements += ". Removed in Windows " + this.SdkVersionRemovedIn;
-		//			}
-		//		}
-		//		return requirements;
-		//	}
-		//}
-
-		//public virtual string Requirements
-		//{
-		//	get
-		//	{
-		//		string requirements = "Introduced in Windows " + this.SdkVersionIntroducedIn;
-		//		if (this.SdkVersionRemovedIn != null)
-		//		{
-		//			{
-		//				requirements += ". Removed in Windows " + this.SdkVersionRemovedIn;
-		//			}
-		//		}
-		//		return requirements;
-		//	}
-		//}
-
-		public FunctionWin32Grouped(string name, string moduleName, string sdkVersionIntroducedIn, string functionWin32Id)
-			: base(name, moduleName)
-		{
-			this.SdkVersionIntroducedIn = sdkVersionIntroducedIn;
-			this.FunctionWin32Id = functionWin32Id;
-			this.SuppressInAlphabetizedList = false;
-		}
-	}
-
-	internal class FunctionWin32GroupedByModule : FunctionWin32Grouped
-	{
-		public FunctionWin32GroupedByModule(string name, string moduleName, string sdkVersionIntroducedIn, string functionWin32Id)
-			: base(name, moduleName, sdkVersionIntroducedIn, functionWin32Id)
-		{
-		}
-
-		//public FunctionWin32GroupedByInitialChar CloneAsFunctionWin32GroupedByInitialChar()
-		//{
-		//	return new FunctionWin32GroupedByInitialChar(this);
-		//}
-	}
-
-	internal class FunctionWin32GroupedByInitialChar : FunctionWin32Grouped
-	{
-		public FunctionWin32GroupedByInitialChar(string name, string moduleName, string sdkVersionIntroducedIn, string functionWin32Id, ApiType apiType, string sdkVersionRemovedIn, Module moduleMovedTo, bool suppressInAlphabetizedList)
-			: base(name, moduleName, sdkVersionIntroducedIn, functionWin32Id)
-		{
-			this.ApiType = apiType;
-			this.SdkVersionRemovedIn = sdkVersionRemovedIn;
-			this.ModuleMovedTo = moduleMovedTo;
-			this.SuppressInAlphabetizedList = suppressInAlphabetizedList;
-		}
-
-		public FunctionWin32GroupedByInitialChar(FunctionWin32GroupedByModule functionWin32GroupedByModule)
-			: base(functionWin32GroupedByModule.Name, functionWin32GroupedByModule.ModuleName, functionWin32GroupedByModule.SdkVersionIntroducedIn, functionWin32GroupedByModule.FunctionWin32Id)
-		{
-			this.ApiType = functionWin32GroupedByModule.ApiType;
-			this.SdkVersionRemovedIn = functionWin32GroupedByModule.SdkVersionRemovedIn;
-			this.ModuleMovedTo = functionWin32GroupedByModule.ModuleMovedTo;
-			this.SuppressInAlphabetizedList = functionWin32GroupedByModule.SuppressInAlphabetizedList;
 		}
 	}
 
@@ -303,6 +164,101 @@ namespace WDCMLSDK
 	}
 
 	/// <summary>
+	/// A class representing a Win32 function in the docs.
+	/// </summary>
+	internal class FunctionWin32InDocs : FunctionWin32
+	{
+		public FunctionWin32InDocs(string projectName, string id, string name, FileInfo fileInfo)
+			: base(name, null)
+		{
+			this.ProjectName = projectName;
+			this.Id = id;
+			this.Name = name;
+			this.FileInfo = fileInfo;
+		}
+
+		public string ProjectName = string.Empty;
+		public string Id = string.Empty;
+		public FileInfo FileInfo;
+	}
+
+	/// <summary>
+	/// A class representing an api grouped by some key.
+	/// </summary>
+	internal class FunctionWin32Grouped : FunctionWin32
+	{
+		public string SdkVersionIntroducedIn { get; set; }
+		public string SdkVersionRemovedIn { get; set; }
+		public string FunctionWin32Id { get; set; }
+		public Module ModuleMovedTo { get; set; }
+
+		public FunctionWin32Grouped(string moduleName, string name, string sdkVersionIntroducedIn, string functionWin32Id)
+			: base(name, moduleName)
+		{
+			this.SdkVersionIntroducedIn = sdkVersionIntroducedIn;
+			this.FunctionWin32Id = functionWin32Id;
+		}
+	}
+
+	internal class FunctionWin32GroupedByModule : FunctionWin32Grouped
+	{
+		public string Requirements
+		{
+			get
+			{
+				string requirements = "Introduced in Windows " + this.SdkVersionIntroducedIn;
+				if (this.SdkVersionRemovedIn != null)
+				{
+					if (this.ModuleMovedTo != null)
+					{
+						requirements += ". Moved to " + this.ModuleMovedTo.Name + " in Windows " + this.SdkVersionRemovedIn;
+					}
+					else
+					{
+						requirements += ". Removed in Windows " + this.SdkVersionRemovedIn;
+					}
+				}
+				return requirements;
+			}
+		}
+
+		public FunctionWin32GroupedByModule(string moduleName, string name, string sdkVersionIntroducedIn, string functionWin32Id)
+			: base(moduleName, name, sdkVersionIntroducedIn, functionWin32Id)
+		{
+		}
+	}
+
+	internal class FunctionWin32GroupedByInitialChar : FunctionWin32Grouped
+	{
+		public string Module
+		{
+			get
+			{
+				string requirements = "Introduced into " + this.ModuleName + " in Windows " + this.SdkVersionIntroducedIn;
+				if (this.SdkVersionRemovedIn != null)
+				{
+					if (this.ModuleMovedTo != null)
+					{
+						requirements += ". Moved to " + this.ModuleMovedTo.Name + " in Windows " + this.SdkVersionRemovedIn;
+					}
+					else
+					{
+						requirements += ". Removed in Windows " + this.SdkVersionRemovedIn;
+					}
+				}
+				return requirements;
+			}
+		}
+
+		public FunctionWin32GroupedByInitialChar(string moduleName, string name, string sdkVersionIntroducedIn, string functionWin32Id, string sdkVersionRemovedIn, Module moduleMovedTo)
+			: base(moduleName, name, sdkVersionIntroducedIn, functionWin32Id)
+		{
+			this.SdkVersionRemovedIn = sdkVersionRemovedIn;
+			this.ModuleMovedTo = moduleMovedTo;
+		}
+	}
+
+	/// <summary>
 	/// A class representing an api set or dll.
 	/// </summary>
 	internal class Module
@@ -323,11 +279,9 @@ namespace WDCMLSDK
 			this.apis = new List<FunctionWin32GroupedByModule>();
 		}
 
-		public FunctionWin32GroupedByModule AddApi(string name, string sdkVersionIntroducedIn, string functionWin32Id)
+		public void AddApi(string name, string sdkVersionIntroducedIn, string functionWin32Id)
 		{
-			FunctionWin32GroupedByModule addedApi = new FunctionWin32GroupedByModule(name, this.Name, sdkVersionIntroducedIn, functionWin32Id);
-			this.apis.Add(addedApi);
-			return addedApi;
+			this.apis.Add(new FunctionWin32GroupedByModule(this.Name, name, sdkVersionIntroducedIn, functionWin32Id));
 		}
 
 		public FunctionWin32GroupedByModule FindApi(string name)
@@ -355,16 +309,9 @@ namespace WDCMLSDK
 			this.apis = new List<FunctionWin32GroupedByInitialChar>();
 		}
 
-		public void AddApi(string name, string moduleName, string sdkVersionIntroducedIn, string functionWin32Id, ApiType apiType, string sdkVersionRemovedIn, Module moduleMovedTo, bool suppressInAlphabetizedList)
+		public void AddApi(string moduleName, string name, string sdkVersionIntroducedIn, string functionWin32Id, string sdkVersionRemovedIn, Module moduleMovedTo)
 		{
-			var api = new FunctionWin32GroupedByInitialChar(name, moduleName, sdkVersionIntroducedIn, functionWin32Id, apiType, sdkVersionRemovedIn, moduleMovedTo, suppressInAlphabetizedList);
-			this.apis.Add(api);
-		}
-
-		public void AddApi(FunctionWin32GroupedByModule functionWin32GroupedByModule)
-		{
-			var api = new FunctionWin32GroupedByInitialChar(functionWin32GroupedByModule);
-			this.apis.Add(api);
+			this.apis.Add(new FunctionWin32GroupedByInitialChar(moduleName, name, sdkVersionIntroducedIn, functionWin32Id, sdkVersionRemovedIn, moduleMovedTo));
 		}
 
 		public FunctionWin32GroupedByInitialChar FindApi(string name)
@@ -377,7 +324,7 @@ namespace WDCMLSDK
 			this.apis.Sort(new FunctionWin32GroupedByInitialCharComparer());
 		}
 
-		public static List<InitialCharGroup> ListOfInitialCharGroupFromListOfModule(List<Module> modules, List<FunctionWin32Grouped> interfaces, List<FunctionWin32Grouped> coclasses)
+		public static List<InitialCharGroup> ListOfInitialCharGroupFromListOfModule(List<Module> modules)
 		{
 			List<InitialCharGroup> initialCharGroups = new List<InitialCharGroup>();
 
@@ -385,29 +332,22 @@ namespace WDCMLSDK
 			{
 				foreach (FunctionWin32GroupedByModule functionWin32GroupedByModule in module.Apis)
 				{
-					if (!functionWin32GroupedByModule.SuppressInAlphabetizedList)
+					string initialCharGroupKey = functionWin32GroupedByModule.Name.Substring(0, 1);
+					if (char.IsLetter(initialCharGroupKey[0]))
 					{
-						InitialCharGroup initialCharGroup = InitialCharGroup.InitialCharGroupForName(initialCharGroups, functionWin32GroupedByModule.Name);
-						initialCharGroup.AddApi(functionWin32GroupedByModule);
+						initialCharGroupKey = initialCharGroupKey.ToUpper();
 					}
-				}
-			}
-
-			if (interfaces != null)
-			{
-				foreach (FunctionWin32Grouped eachInterface in interfaces)
-				{
-					InitialCharGroup initialCharGroup = InitialCharGroup.InitialCharGroupForName(initialCharGroups, eachInterface.Name);
-					initialCharGroup.AddApi(eachInterface.Name, null, eachInterface.SdkVersionIntroducedIn, eachInterface.FunctionWin32Id, ApiType.CoInterface, eachInterface.SdkVersionRemovedIn, eachInterface.ModuleMovedTo, false);
-				}
-			}
-
-			if (coclasses != null)
-			{
-				foreach (FunctionWin32Grouped eachCoclass in coclasses)
-				{
-					InitialCharGroup initialCharGroup = InitialCharGroup.InitialCharGroupForName(initialCharGroups, eachCoclass.Name);
-					initialCharGroup.AddApi(eachCoclass.Name, null, eachCoclass.SdkVersionIntroducedIn, eachCoclass.FunctionWin32Id, ApiType.CoClass, eachCoclass.SdkVersionRemovedIn, eachCoclass.ModuleMovedTo, false);
+					else
+					{
+						initialCharGroupKey = "_";
+					}
+					InitialCharGroup initialCharGroup = initialCharGroups.Find(found => found.Name == initialCharGroupKey);
+					if (initialCharGroup == null)
+					{
+						initialCharGroup = new InitialCharGroup(initialCharGroupKey);
+						initialCharGroups.Add(initialCharGroup);
+					}
+					initialCharGroup.AddApi(functionWin32GroupedByModule.ModuleName, functionWin32GroupedByModule.Name, functionWin32GroupedByModule.SdkVersionIntroducedIn, functionWin32GroupedByModule.FunctionWin32Id, functionWin32GroupedByModule.SdkVersionRemovedIn, functionWin32GroupedByModule.ModuleMovedTo);
 				}
 			}
 
@@ -419,26 +359,6 @@ namespace WDCMLSDK
 
 			return initialCharGroups;
 		}
-
-		public static InitialCharGroup InitialCharGroupForName(List<InitialCharGroup> initialCharGroups, string name)
-		{
-			string initialCharGroupKey = name.Substring(0, 1);
-			if (char.IsLetter(initialCharGroupKey[0]))
-			{
-				initialCharGroupKey = initialCharGroupKey.ToUpper();
-			}
-			else
-			{
-				initialCharGroupKey = "_";
-			}
-			InitialCharGroup initialCharGroup = initialCharGroups.Find(found => found.Name == initialCharGroupKey);
-			if (initialCharGroup == null)
-			{
-				initialCharGroup = new InitialCharGroup(initialCharGroupKey);
-				initialCharGroups.Add(initialCharGroup);
-			}
-			return initialCharGroup;
-		}
 	}
 
 	/// <summary>
@@ -446,10 +366,11 @@ namespace WDCMLSDK
 	/// </summary>
 	internal class UmbrellaLib
 	{
-		private static List<string> blacklistedAPIs = new List<string>() { "_CorDllMain", "_CorExeMain" };
 		public string Name { get; set; }
 		public List<Module> Modules = new List<Module>();
 		public List<InitialCharGroup> InitialCharGroups = null;
+
+		public Dictionary<string, List<string>> setToApiMappings = new Dictionary<string, List<string>>();
 
 		public UmbrellaLib(string name)
 		{
@@ -471,8 +392,6 @@ namespace WDCMLSDK
 
 		public void AddApi(Microsoft.CoreSystem.WindowsCompositionDatabase.Database.Api api, string sdkVersion, string functionWin32Id)
 		{
-			if (UmbrellaLib.blacklistedAPIs.Contains(api.Name)) return;
-
 			bool isApiSet = false;
 			foreach (Microsoft.CoreSystem.WindowsCompositionDatabase.Database.Apiset apiset in api.Apisets) // api.Apisets can contain many entries: 6 is not unusual.
 			{
@@ -494,23 +413,9 @@ namespace WDCMLSDK
 			}
 		}
 
-		public bool DidThisApiMoveToThisModule(string apiName, string moduleMovedToName)
-		{
-			foreach (Module module in this.Modules)
-			{
-				FunctionWin32GroupedByModule foundApi = module.FindApi(apiName);
-
-				if (foundApi != null && foundApi.ModuleMovedTo != null && foundApi.ModuleMovedTo.Name == moduleMovedToName)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
 		public void SortAlphabetically()
 		{
-			this.InitialCharGroups = InitialCharGroup.ListOfInitialCharGroupFromListOfModule(this.Modules, null, null);
+			this.InitialCharGroups = InitialCharGroup.ListOfInitialCharGroupFromListOfModule(this.Modules);
 		}
 
 	}
