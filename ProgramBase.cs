@@ -955,11 +955,15 @@ namespace WDCMLSDKBase
 		/// <summary>
 		/// Win32 APIs and features supported by Desktop
 		/// </summary>
-		Win32Desktop,
+		Win32DesktopDotTxt,
 		/// <summary>
 		/// Win32 APIs and features supported by Windows Server (only)
 		/// </summary>
-		Win32ServerOnly
+		Win32WsuaDotTxt,
+		/// <summary>
+		/// Win32 APIs and features supported by Desktop and Windows Server
+		/// </summary>
+		Win32DesktopAndWsuaDotTxt
 	}
 
 	/// <summary>

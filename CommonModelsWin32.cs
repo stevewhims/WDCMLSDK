@@ -19,26 +19,35 @@ namespace WDCMLSDK
 		/// </summary>
 		public static ApiRefModelWin32 GetApiRefModelWin32(Platform platform)
 		{
-			string platformDesc = "desktop";
-			string desktopOrWsuaDotTxtFilename = "desktop.txt";
-			List<string> desktopOrWsuaDotTxt = null;
-			if (platform == Platform.Win32ServerOnly)
-			{
-				platformDesc = "server";
-				desktopOrWsuaDotTxtFilename = "wsua.txt";
-			}
-			ProgramBase.ConsoleWrite("Creating Win32 " + platformDesc + " docset", ConsoleWriteStyle.Success);
-			string projectListIntro = "These are the shipping projects that document Win32 " + platformDesc + " functions (they're in " + desktopOrWsuaDotTxtFilename + "). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
-			ProgramBase.ConsoleWrite(projectListIntro, ConsoleWriteStyle.Highlight);
+			string platformDesc = string.Empty;
+			string projectFilename = string.Empty;
+			var sortedProjectList = new SortedList<string, string>();
 
-			ProgramBase.LoadTextFileIntoStringList(desktopOrWsuaDotTxtFilename, ref desktopOrWsuaDotTxt, "MISSING " + desktopOrWsuaDotTxtFilename + ". This file could not be found in your enlistment folder path. Your configuration.txt contains something like: my_enlistment_folder D:\\Source_Depot\\devdocmain. This should be the folder that contains the dev_*, m_*, w_* folders, BuildX, desktop.txt, etc.");
+			if (platform == Platform.Win32DesktopDotTxt || platform == Platform.Win32DesktopAndWsuaDotTxt)
+			{
+				platformDesc = "desktop";
+				projectFilename = "desktop.txt";
+				ApiRefModelWin32.AppendToProjectList(ref sortedProjectList, "desktop.txt");
+			}
+
+			if (platform == Platform.Win32WsuaDotTxt)
+			{
+				if (platformDesc.Length == 0) platformDesc = "server";
+				else platformDesc += "and server";
+				if (projectFilename.Length == 0) projectFilename = "wsua.txt";
+				else projectFilename += "and wsua.txt";
+				ApiRefModelWin32.AppendToProjectList(ref sortedProjectList, "wsua.txt");
+			}
 
 			List<DirectoryInfo> projectDirectoryInfos = new List<DirectoryInfo>();
-
-			foreach (string eachProjectName in desktopOrWsuaDotTxt)
+			foreach (string eachProjectName in sortedProjectList.Keys)
 			{
 				projectDirectoryInfos.AddRange(ProgramBase.EnlistmentDirectoryInfo.GetDirectories(eachProjectName, SearchOption.TopDirectoryOnly).ToList());
 			}
+
+			ProgramBase.ConsoleWrite("Creating Win32 " + platformDesc + " docset", ConsoleWriteStyle.Success);
+			string projectListIntro = "These are the shipping projects that document Win32 " + platformDesc + " functions (they're in " + projectFilename + "). The app only processes topics in these projects that are represented by an unfiltered TOC entry (that is, no MSDN build condition).";
+			ProgramBase.ConsoleWrite(projectListIntro, ConsoleWriteStyle.Highlight);
 
 			ApiRefModelWin32 apiRefModelWin32 = new ApiRefModelWin32();
 
@@ -54,16 +63,27 @@ namespace WDCMLSDK
 					ProgramBase.ConsoleWrite(".\n\n");
 				}
 				// For reference projects, the topic files should be in a folder with the same name as the project folder. But use the standard algorithm just to be sure.
-				apiRefModelWin32.ProcessProject(eachProjectDirectoryInfo.Name, EditorBase.GetEditorsForTopicsInProject(eachProjectDirectoryInfo), ref apiRefModelWin32);
+				apiRefModelWin32.ProcessProject(eachProjectDirectoryInfo.Name, EditorBase.GetEditorsForTopicsInProject(eachProjectDirectoryInfo));
 			}
 
 			return apiRefModelWin32;
 		}
 
+		private static void AppendToProjectList(ref SortedList<string, string> sortedProjectList, string dotTxtFilename)
+		{
+			List<string> projectList = null;
+			ProgramBase.LoadTextFileIntoStringList(dotTxtFilename, ref projectList, "MISSING " + dotTxtFilename + ". This file could not be found in your enlistment folder path. Your configuration.txt contains something like: my_enlistment_folder D:\\Source_Depot\\devdocmain. This should be the folder that contains the dev_*, m_*, w_* folders, BuildX, desktop.txt, etc.");
+
+			foreach (string eachProjectName in projectList)
+			{
+				sortedProjectList.Add(eachProjectName, null);
+			}
+		}
+
 		// Note: the key here is the ToLower version but the FunctionWin32 contains the original case from the topic's title.
 		public Dictionary<string, FunctionWin32InDocs> FunctionWin32InDocses = new Dictionary<string, FunctionWin32InDocs>();
 
-		public void ProcessProject(string projectName, List<Editor> topicEditors, ref ApiRefModelWin32 apiRefModelWin32)
+		private void ProcessProject(string projectName, List<Editor> topicEditors)
 		{
 			foreach (Editor eachTopicEditor in topicEditors)
 			{
@@ -75,7 +95,7 @@ namespace WDCMLSDK
 					bool functionAlreadyExists = false;
 					FunctionWin32InDocs functionWin32 = null;
 
-					this.EnsureFunction(projectName, eachTopicMetadataAtId, eachTopicTitle, eachTopicFileInfo, ref functionAlreadyExists, ref functionWin32);
+					this.EnsureFunction(eachTopicEditor, projectName, eachTopicMetadataAtId, eachTopicTitle, eachTopicFileInfo, ref functionAlreadyExists, ref functionWin32);
 					if (functionAlreadyExists)
 					{
 						ProgramBase.DupedWin32ApiNamesLog.AddEntry(string.Format("{0} and {1}", eachTopicFileInfo.FullName, functionWin32.FileInfo.FullName));
@@ -84,7 +104,7 @@ namespace WDCMLSDK
 			}
 		}
 
-		public void EnsureFunction(string projectName, string id, string name, FileInfo fileInfo, ref bool functionAlreadyExists, ref FunctionWin32InDocs functionWin32)
+		public void EnsureFunction(Editor eachTopicEditor, string projectName, string id, string name, FileInfo fileInfo, ref bool functionAlreadyExists, ref FunctionWin32InDocs functionWin32)
 		{
 			if (this.FunctionWin32InDocses.ContainsKey(name.ToLower()))
 			{
@@ -94,7 +114,7 @@ namespace WDCMLSDK
 			else
 			{
 				functionAlreadyExists = false;
-				this.FunctionWin32InDocses[name.ToLower()] = new FunctionWin32InDocs(projectName, id, name, fileInfo);
+				this.FunctionWin32InDocses[name.ToLower()] = new FunctionWin32InDocs(projectName, id, name, fileInfo, eachTopicEditor.GetLibraryFilenames());
 			}
 		}
 
@@ -124,11 +144,13 @@ namespace WDCMLSDK
 	{
 		public string Name { get; set; }
 		public string ModuleName { get; set; }
+		public List<string> LibraryNames { get; set; }
 
-		public FunctionWin32(string name, string moduleName)
+		public FunctionWin32(string name, string moduleName, List<string> libraryNames)
 		{
 			this.Name = name;
 			this.ModuleName = moduleName;
+			this.LibraryNames = libraryNames;
 		}
 	}
 
@@ -170,13 +192,18 @@ namespace WDCMLSDK
 	/// </summary>
 	internal class FunctionWin32InDocs : FunctionWin32
 	{
-		public FunctionWin32InDocs(string projectName, string id, string name, FileInfo fileInfo)
-			: base(name, null)
+		public FunctionWin32InDocs(string projectName, string id, string name, FileInfo fileInfo, List<string> libraryNames)
+			: base(name, null, libraryNames)
 		{
 			this.ProjectName = projectName;
 			this.Id = id;
 			this.Name = name;
 			this.FileInfo = fileInfo;
+		}
+
+		public FunctionWin32InDocs(string projectName, string id, string name, FileInfo fileInfo)
+			: this(projectName, id, name, fileInfo, null)
+		{
 		}
 
 		public string ProjectName = string.Empty;
@@ -195,7 +222,7 @@ namespace WDCMLSDK
 		public Module ModuleMovedTo { get; set; }
 
 		public FunctionWin32Grouped(string moduleName, string name, string sdkVersionIntroducedIn, string functionWin32Id)
-			: base(name, moduleName)
+			: base(name, moduleName, null)
 		{
 			this.SdkVersionIntroducedIn = sdkVersionIntroducedIn;
 			this.FunctionWin32Id = functionWin32Id;

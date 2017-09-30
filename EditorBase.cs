@@ -722,6 +722,33 @@ namespace WDCMLSDKBase
 			}
 		}
 
+		public List<string> GetLibraryFilenames()
+		{
+			var libraryFilenames = new List<string>();
+
+			XElement content = this.GetUniqueDescendant("content");
+			if (content != null)
+			{
+				XElement info = this.GetUniqueDescendant("info", content);
+				if (info != null)
+				{
+					List<XElement> libraries = this.GetDescendants("library", info);
+					if (libraries != null)
+					{
+						foreach (var library in libraries)
+						{
+							XElement filename = this.GetUniqueDescendant("filename", library);
+							if (filename != null)
+							{
+								libraryFilenames.Add(filename.Value);
+							}
+						}
+					}
+				}
+			}
+			return libraryFilenames;
+		}
+
 		public string GetMetadataAtBeta()
 		{
 			XElement metadata = this.GetUniqueDescendant("metadata");
