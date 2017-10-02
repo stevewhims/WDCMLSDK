@@ -17,26 +17,35 @@ namespace WDCMLSDK
 		/// <summary>
 		/// Gets an object model representing the Win32 API ref docs.
 		/// </summary>
-		public static ApiRefModelWin32 GetApiRefModelWin32(Platform platform)
+		public static ApiRefModelWin32 GetApiRefModelWin32(bool desktop, bool wsua = false, bool wdk = false)
 		{
 			string platformDesc = string.Empty;
 			string projectFilename = string.Empty;
 			var sortedProjectList = new SortedList<string, string>();
 
-			if (platform == Platform.Win32DesktopDotTxt || platform == Platform.Win32DesktopAndWsuaDotTxt)
+			if (desktop)
 			{
 				platformDesc = "desktop";
 				projectFilename = "desktop.txt";
 				ApiRefModelWin32.AppendToProjectList(ref sortedProjectList, "desktop.txt");
 			}
 
-			if (platform == Platform.Win32WsuaDotTxt)
+			if (wsua)
 			{
 				if (platformDesc.Length == 0) platformDesc = "server";
-				else platformDesc += "and server";
+				else platformDesc += " and server";
 				if (projectFilename.Length == 0) projectFilename = "wsua.txt";
-				else projectFilename += "and wsua.txt";
+				else projectFilename += " and wsua.txt";
 				ApiRefModelWin32.AppendToProjectList(ref sortedProjectList, "wsua.txt");
+			}
+
+			if (wdk)
+			{
+				if (platformDesc.Length == 0) platformDesc = "wdk";
+				else platformDesc += " and wdk";
+				if (projectFilename.Length == 0) projectFilename = "wdk.txt";
+				else projectFilename += " and wdk.txt";
+				ApiRefModelWin32.AppendToProjectList(ref sortedProjectList, "wdk.txt");
 			}
 
 			List<DirectoryInfo> projectDirectoryInfos = new List<DirectoryInfo>();
@@ -76,7 +85,8 @@ namespace WDCMLSDK
 
 			foreach (string eachProjectName in projectList)
 			{
-				sortedProjectList.Add(eachProjectName, null);
+				if (eachProjectName == "buses") continue;
+				if (!sortedProjectList.Keys.Contains(eachProjectName)) sortedProjectList.Add(eachProjectName, null);
 			}
 		}
 

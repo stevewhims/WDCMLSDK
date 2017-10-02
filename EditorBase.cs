@@ -59,6 +59,8 @@ namespace WDCMLSDKBase
 			}
 		}
 
+		public bool IsValid { get { return this.xDocument != null; } }
+
 		// Methods that don't modify.
 
 		/// <summary>

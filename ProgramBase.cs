@@ -38,11 +38,16 @@ namespace WDCMLSDKBase
 		/// True if this is a dry run, otherwise false. A dry run attempts to save files to disk but it does not attempt to check out. This is read from configuration.txt.
 		/// </summary>
 		public static bool DryRun = false;
+		/// <summary>
+		/// True if an xtoc's topicURL points to a missing file, otherwise false. This is read from configuration.txt.
+		/// </summary>
+		//public static bool ThrowExceptionOnBadXTocTopicURL = true;
 
 		// The trailing spaces are important so that they don't get included in the value that follows.
 		private const string MY_ENLISTMENT_FOLDER_CONFIG_KEY = "my_enlistment_folder ";
 		private const string API_REF_STUB_FOLDER_CONFIG_KEY = "api_ref_stub_folder ";
 		private const string DRYRUN_CONFIG_KEY = "dryrun ";
+		//private const string THROWEXCEPTIONONBADXTOCTOPICURL_CONFIG_KEY = "throwexceptiononbadxtoctopicurl ";
 		private const string UWP_PROJ_CONFIG_KEY = "uwp_proj ";
 		private const string UWP_EXCLUDE_TYPE_CONFIG_KEY = "uwp_exclude_type ";
 		private const string WINRT_PROJ_CONFIG_KEY = "winrt_proj ";
@@ -168,6 +173,10 @@ namespace WDCMLSDKBase
 						{
 							ProgramBase.DryRun = (value == "1");
 						}
+						//else if (this.GetConfigValue(currentLine, ProgramBase.THROWEXCEPTIONONBADXTOCTOPICURL_CONFIG_KEY, ref value))
+						//{
+						//	ProgramBase.ThrowExceptionOnBadXTocTopicURL = (value == "1");
+						//}
 						else if (this.GetConfigValue(currentLine, ProgramBase.UWP_PROJ_CONFIG_KEY, ref value))
 						{
 							ProgramBase.UWPProjects.Add(value);
@@ -302,7 +311,7 @@ namespace WDCMLSDKBase
 							// If this is the second time we've seen this key...
 							if (mappingsDict.ContainsKey(values[0]))
 							{
-								Program.DuplicatedMappingsLog.Add(fileName + " has duplicate key: " + values[0] + ", " + mappingsDict[values[0]]);
+								Program.DuplicatedMappingsLog.Add(fileName + " has duplicate key: " + values[0] + "," + mappingsDict[values[0]]);
 								Program.DuplicatedMappingsLog.Add(fileName + " has duplicate key: " + currentLine);
 								mappingsDict.Remove(values[0]);
 								Program.DuplicateMapKeys.Add(values[0]);
@@ -961,9 +970,9 @@ namespace WDCMLSDKBase
 		/// </summary>
 		Win32WsuaDotTxt,
 		/// <summary>
-		/// Win32 APIs and features supported by Desktop and Windows Server
+		/// Win32 APIs and features supported by the Windows Driver Kit
 		/// </summary>
-		Win32DesktopAndWsuaDotTxt
+		Win32WdkDotTxt
 	}
 
 	/// <summary>

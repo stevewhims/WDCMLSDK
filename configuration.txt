@@ -12,6 +12,12 @@ api_ref_stub_folder \\wcpub-dc-pub2\winrt\latest
 
 dryrun 1
 
+// Set throwexceptiononbadxtoctopicurl to 1 or 0.
+// 1: Means throw an exception and terminate the program if an xtoc's topicURL points to a missing file.
+// 0: Means do not throw an exception. Just log the issue, color the containing project's name red, and continue.
+
+// throwexceptiononbadxtoctopicurl 0
+
 // !!!NOTE!!! a project has to be in metro.txt or windev.txt to be processed. Also, a topic has to be represented by an
 // unfiltered TOC entry (that is, no MSDN build condition) to be processed.
 
